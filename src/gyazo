@@ -1,0 +1,41 @@
+#!/bin/sh
+
+ZENITY_CMD="zenity --title=Gyazo"
+IMAGE="$1"
+
+upload_png() {
+	if [ -f "$1" ]; then
+		local IMG_FILE IMG_URL IMG_ID
+		IMG_FILE="$1"
+		IMG_URL=$(curl -s -A "Gyazo/1.0" -i http://gyazo.com/upload.cgi -F "imagedata=@$1" | grep gyazo.com)
+		IMG_ID=$(echo "$IMG_URL" | sed -e 's#^.*/##')
+		$ZENITY_CMD --info --html --text="File: <a href='file://$IMG_FILE'>$IMG_FILE</a>\nPermalink: <a href='http://i.gyazo.com/$IMG_ID.png'>http://i.gyazo.com/$IMG_ID.png</a>\nURL: <a href='$IMG_URL'>$IMG_URL</a>"
+	else
+		return 1
+	fi
+}
+
+if [ ! -z "$IMAGE" ]; then
+	if [ ! -f "$IMAGE" ]; then
+		$ZENITY_CMD --error --text="File not found: $IMAGE"
+		exit 1
+	fi
+	if file --mime "$IMAGE" | grep -q image/png; then
+		upload_png "$IMAGE"
+	elif file --mime "$IMAGE" | grep -q image/; then
+		convert "$IMAGE" "$IMAGE.png"
+		if [ $? != 0 ]; then
+			$ZENITY_CMD --error --text="Unable to convert $IMAGE to PNG"
+			exit 1
+		fi
+		upload_png "$IMAGE.png"
+	fi
+else
+	IMAGE="$(mktemp --suffix=.png)"
+	scrot -b -s "$IMAGE"
+	if [ $? != 0 ]; then
+		$ZENITY_CMD --error --text="Unable to capture image"
+		exit 1
+	fi
+	upload_png "$IMAGE"
+fi
