@@ -6,9 +6,9 @@ Unofficial client for Gyazo (http://gyazo.com/).
 
 ### From source
 
-Install Curl, ImageMagick and Zenity before installing Gyazo.
+Install Curl, File, ImageMagick, Scrot and Zenity before installing Gyazo.
 
-    $ sudo apt-get install curl imagemagick zenity
+    $ sudo apt-get install curl file imagemagick scrot zenity
     $ tar -xzf gyazo-XXX.tar.gz
     $ cd gyazo-XXX
     $ sudo make install
